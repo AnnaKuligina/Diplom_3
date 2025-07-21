@@ -4,7 +4,7 @@ from pages.account_page import AccountPage
 from data import EMAIL, PASSWORD
 
 
-@allure.feature('Основная функциональноть')
+@allure.feature('Основная функциональноcть')
 @allure.story('Тесты функционала главной страницы')
 class TestMainPage:
 

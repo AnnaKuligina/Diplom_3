@@ -5,7 +5,7 @@ from pages.account_page import AccountPage
 from data import EMAIL, PASSWORD
 
 @allure.feature('Лента заказов')
-@allure.story('Тесты раздела "Лента заказов')
+@allure.story('Тесты раздела "Лента заказов"')
 class TestOrderPage:
 
     @allure.title('Открытие всплывающего окна с деталями заказа')
@@ -20,7 +20,11 @@ class TestOrderPage:
 
         with allure.step('Проверяем отображение всплывающего окна'):
             content = order_feed_page.get_order_details_content()
-            assert content != "", "Всплывающее окно с деталями заказа не открылось"
+            assert content != "", "Модальное окно с деталями заказа не открылось"
+
+        with allure.step('Проверяем текст статуса заказа'):
+            status_text = order_feed_page.get_order_status()
+            assert status_text == "Выполнен", f"Ожидался статус 'Выполнен', получен: '{status_text}'"
 
     @allure.title('Отображение созданного заказа в ленте заказов')
     def test_new_order_appears_in_feed(self, driver):
@@ -39,7 +43,7 @@ class TestOrderPage:
             order_id = order_feed_page.get_order_id()
 
         with allure.step('Закрываем детали заказа и открываем ленту заказов'):
-            order_feed_page.close_order_details()
+            assert order_feed_page.close_order_details(), "Не удалось закрыть модальное окно"
             order_feed_page.open_feed_page()
 
         with allure.step('Проверяем, что заказ отображается в ленте заказов'):

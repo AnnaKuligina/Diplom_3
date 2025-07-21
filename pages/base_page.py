@@ -2,19 +2,20 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 
 
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
 
-    def find_element_with_wait(self, locator, timeout=5):
+    def find_element_with_wait(self, locator, timeout=10):
         WebDriverWait(self.driver, timeout).until(
             EC.visibility_of_element_located(locator)
         )
         return self.driver.find_element(*locator)
 
-    def click_on_element(self, locator, timeout=25):
+    def click_on_element(self, locator, timeout=20):
         element = WebDriverWait(self.driver, timeout).until(
             EC.element_to_be_clickable(locator)
         )
@@ -36,13 +37,13 @@ class BasePage:
         formatted_locator = locator_template.format(value)
         return method, formatted_locator
 
-    def click_when_ready(self, locator, timeout=25):
+    def click_when_ready(self, locator, timeout=20):
         WebDriverWait(self.driver, timeout).until(
             EC.element_to_be_clickable(locator)
         )
         self.driver.find_element(*locator).click()
 
-    def is_visible(self, locator, timeout=25):
+    def is_visible(self, locator, timeout=20):
         try:
             WebDriverWait(self.driver, timeout).until(
                 EC.visibility_of_element_located(locator))
@@ -50,13 +51,13 @@ class BasePage:
         except TimeoutException:
             return False
 
-    def js_click(self, locator, timeout=25):
+    def js_click(self, locator, timeout=20):
         element = WebDriverWait(self.driver, timeout).until(
             EC.presence_of_element_located(locator)
         )
         self.driver.execute_script("arguments[0].click();", element)
 
-    def wait_until_visible(self, locator, timeout=5):
+    def wait_until_visible(self, locator, timeout=10):
         WebDriverWait(self.driver, timeout).until(
             EC.visibility_of_element_located(locator)
         )
@@ -104,10 +105,10 @@ class BasePage:
     def open_url(self, url):
         self.driver.get(url)
 
-    def wait_for(self, condition, timeout=30):
+    def wait_for(self, condition, timeout=20):
         WebDriverWait(self.driver, timeout).until(condition)
 
-    def wait_for_text_change(self, locator, initial_text, timeout=30):
+    def wait_for_text_change(self, locator, initial_text, timeout=20):
         self.wait_for(
             lambda _: self.get_text(locator) != initial_text, timeout
         )
@@ -120,3 +121,24 @@ class BasePage:
     def get_attribute(self, locator, attribute_name):
         element = self.find_element_with_wait(locator)
         return element.get_attribute(attribute_name)
+
+    def wait_invisibility(self, locator, timeout=10):
+        return WebDriverWait(self.driver, timeout).until(
+            EC.invisibility_of_element_located(locator)
+        )
+
+    def safe_close_modal(self, close_button_locator, overlay_locator=None, timeout=15):
+        try:
+            if overlay_locator:
+                self.wait_invisibility(overlay_locator, timeout)
+            try:
+                self.click_on_element(close_button_locator)
+            except ElementClickInterceptedException:
+                self.js_click(close_button_locator)
+            # Проверка того, что окно закрылось
+            if overlay_locator:
+                self.wait_invisibility(overlay_locator, timeout)
+            return True
+        except Exception as e:
+            print(f"Не удалось закрыть модальное окно: {str(e)}")
+            return False
