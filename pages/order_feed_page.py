@@ -55,15 +55,11 @@ class OrderFeedPage(BasePage):
 
     @allure.step("Закрыть детали заказа")
     def close_order_details(self):
-        try:
-            return self.safe_close_modal(
-                close_button_locator=OrderFeedLocators.CLOSE_DETAILS_BUTTON,
-                overlay_locator=OrderFeedLocators.LOADING_OVERLAY,
-                timeout=20
-            )
-        except Exception as e:
-            print(f"Ошибка при закрытии деталей заказа: {str(e)}")
-            raise
+        return self.safe_close_modal(
+            close_button_locator=OrderFeedLocators.CLOSE_DETAILS_BUTTON,
+            overlay_locator=OrderFeedLocators.LOADING_OVERLAY,
+            timeout=20
+        )
 
     @allure.step("Получить номер заказа")
     def get_order_id(self):
